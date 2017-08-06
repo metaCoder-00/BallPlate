@@ -1,0 +1,4 @@
+/Drivers/
+/MDK-ARM/*
+/.vscode
+!/MDK-ARM/*.s
