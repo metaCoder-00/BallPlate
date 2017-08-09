@@ -1,7 +1,6 @@
 #include "STM32F746SPI1_OLED.h"
 #include "OLED_FONT.h"
 #include "main.h"
-#include "spi.h"
 #include "usart.h"
 #include "gpio.h"
 #include "delay.h"
@@ -20,38 +19,28 @@
 //向SSD1306写入一个字节。
 //dat:要写入的数据/命令
 //cmd:数据/命令标志 0,表示命令;1,表示数据;
-void OLED_WR_Byte(u8 dat,u8 cmd)
+void OLED_WR_Byte(u8 dat, u8 cmd)
 {
-	uint8_t input_dat[1];
-	input_dat[0] = dat;
-	if(cmd)
-	  OLED_DC_Set();
-	else
-	  OLED_DC_Clr();
-	
-	OLED_CS_Clr();
-//由于采用硬件SPI，注释掉以前管脚，模拟SPI的代码
-/*
-	OLED_CS_Clr();
-	for(i=0;i<8;i++)
-	{
-		OLED_SCLK_Clr();
-		if(dat&0x80)
-			{
-		   OLED_SDIN_Set();
-			}
-		else
-		   OLED_SDIN_Clr();
-				OLED_SCLK_Set();
-		dat<<=1;
-	}
-	OLED_CS_Set();
-	OLED_DC_Set();
-*/
-
-    //spi_mosi(SPI0, SPI_PCS0, &dat, &dat, 1);
-    //LPLD_SPI_Master_Write(SPI0, dat, SPI_PCS0, SPI_PCS_ASSERTED);
-	HAL_SPI_Transmit(&hspi1, input_dat, 1, 1000);
+    u8 i;
+    if (cmd)
+        OLED_DC_Set();
+    else
+        OLED_DC_Clr();
+    OLED_CS_Clr();
+    for (i = 0; i < 8; i++)
+    {
+        OLED_SCLK_Clr();
+        if (dat & 0x80)
+        {
+            OLED_SDIN_Set();
+        }
+        else
+            OLED_SDIN_Clr();
+        OLED_SCLK_Set();
+        dat <<= 1;
+    }
+    OLED_CS_Set();
+    OLED_DC_Set();
 }
 
 void OLED_Set_Pos(unsigned char x, unsigned char y)

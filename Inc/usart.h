@@ -52,7 +52,7 @@
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart3;
+extern UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN Private defines */
 
@@ -61,13 +61,13 @@ extern UART_HandleTypeDef huart3;
 extern void _Error_Handler(char *, int);
 
 void MX_USART1_UART_Init(void);
-void MX_USART3_UART_Init(void);
+void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void UART_SetBaud(uint32_t baud);
 
-void usart3_niming_report(uint8_t fun, uint8_t *data, uint8_t len);
-void usart3_send_char(uint8_t c);
+void usart2_niming_report(uint8_t fun, uint8_t *data, uint8_t len);
+void usart2_send_char(uint8_t c);
 
 /* USER CODE END Prototypes */
 
