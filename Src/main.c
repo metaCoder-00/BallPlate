@@ -123,8 +123,10 @@ int main(void)
   BSP_SDRAM_Initialization_sequence(REFRESH_COUNT);
   ov2640_Init(ov2640_R160x120);
   WIFI_Transparent_Init();
+  ov2640_Config(OV2640_ADDR, ov2640_CONTRAST_BRIGHTNESS, OV2640_CONTRAST_LEVEL4, OV2640_BRIGHTNESS_LEVEL0);
   ov2640_SetYUV();
-  ov2640_ContinuousStart(ov2640_FRAME_BUFFER);
+  //ov2640_ContinuousStart(ov2640_FRAME_BUFFER);
+  ov2640_SnapshotStart(ov2640_FRAME_BUFFER);
 
   OLED_Init();
   MPU_Init();
@@ -141,7 +143,7 @@ int main(void)
   while (1)
   {
   /* USER CODE END WHILE */
-		
+
   /* USER CODE BEGIN 3 */
 //    if (hdcmi.State == HAL_DCMI_STATE_SUSPENDED)
 //    {

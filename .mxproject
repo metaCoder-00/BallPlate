@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=E:/My works File/STM32Cube File/BallPlate/Inc
+HeaderPath=D:/STM32_Prj/BallPlate/Inc
 HeaderFiles=gpio.h;dcmi.h;dma.h;i2c.h;usart.h;stm32f7xx_it.h;stm32f7xx_hal_conf.h;main.h;fmc.h;tim.h;spi.h;
-SourcePath=E:/My works File/STM32Cube File/BallPlate/Src
+SourcePath=D:/STM32_Prj/BallPlate/Src
 SourceFiles=gpio.h;dcmi.h;dma.h;i2c.h;usart.h;stm32f7xx_it.h;stm32f7xx_hal_conf.h;main.h;gpio.c;dcmi.c;dma.c;i2c.c;usart.c;stm32f7xx_it.c;stm32f7xx_hal_msp.c;main.c;fmc.h;fmc.c;tim.h;tim.c;spi.h;spi.c;
 
 [PreviousLibFiles]

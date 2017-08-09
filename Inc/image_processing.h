@@ -18,7 +18,7 @@
 #define BLACK 0
 #define WHITE 255
 
-#define MAX_LEN 10000
+#define MAX_LEN 1000
 
 typedef struct 
 {

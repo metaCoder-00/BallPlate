@@ -219,16 +219,18 @@ void HAL_DCMI_MspDeInit(DCMI_HandleTypeDef* dcmiHandle)
 } 
 
 /* USER CODE BEGIN 1 */
-//void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
-//{
-//  HAL_DCMI_Suspend(hdcmi);
-//}
-
-void HAL_DCMI_VsyncEventCallback(DCMI_HandleTypeDef *hdcmi)
+void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
 {
-//  HAL_DCMI_Suspend(hdcmi);
-   Img_Process();
+  Img_Process();
+  ov2640_SnapshotStart(ov2640_FRAME_BUFFER);
+  //HAL_DCMI_Suspend(hdcmi);
 }
+
+// void HAL_DCMI_VsyncEventCallback(DCMI_HandleTypeDef *hdcmi)
+// {
+// //  HAL_DCMI_Suspend(hdcmi);
+//    Img_Process();
+// }
 /* USER CODE END 1 */
 
 /**

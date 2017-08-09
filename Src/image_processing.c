@@ -138,19 +138,25 @@ static void Run_Label(uint8_t **image)
     {
         if (image[i][0] == WHITE)
         {
-            ++cntLabel;
-            runList->data[++(runList->last)].nLabel = cntLabel;
-            runList->data[runList->last].nRow = i;
-            runList->data[runList->last].nStart = 0;
+            if (runList->last < MAX_LEN - 1)
+            {
+                ++cntLabel;
+                runList->data[++(runList->last)].nLabel = cntLabel;
+                runList->data[runList->last].nRow = i;
+                runList->data[runList->last].nStart = 0;
+            }
         }
         for (j = 1; j < IMAGE_WIDTH; ++j)
         {
             if (image[i][j - 1] == BLACK && image[i][j] == WHITE)
             {
-                ++cntLabel;
-                runList->data[++(runList->last)].nLabel = cntLabel;
-                runList->data[runList->last].nRow = i;
-                runList->data[runList->last].nStart = j;
+                if (runList->last < MAX_LEN - 1)
+                {
+                    ++cntLabel;
+                    runList->data[++(runList->last)].nLabel = cntLabel;
+                    runList->data[runList->last].nRow = i;
+                    runList->data[runList->last].nStart = j;
+                }
             }
             else if (image[i][j - 1] == WHITE && image[i][j] == BLACK)
             {
@@ -184,15 +190,18 @@ static void Run_Label(uint8_t **image)
                 }
                 else if (runList->data[i].nLabel != runList->data[j].nLabel)
                 {
-                    if (runList->data[i].nLabel > runList->data[j].nLabel)
+                    if (markList->last < MAX_LEN)
                     {
-                        markList->data[++(markList->last)].nMarkValue1 = runList->data[i].nLabel;
-                        markList->data[markList->last].nMarkValue2 = runList->data[j].nLabel;
-                    }
-                    else
-                    {
-                        markList->data[++(markList->last)].nMarkValue1 = runList->data[j].nLabel;
-                        markList->data[markList->last].nMarkValue2 = runList->data[i].nLabel;
+                        if (runList->data[i].nLabel > runList->data[j].nLabel)
+                        {
+                            markList->data[++(markList->last)].nMarkValue1 = runList->data[i].nLabel;
+                            markList->data[markList->last].nMarkValue2 = runList->data[j].nLabel;
+                        }
+                        else
+                        {
+                            markList->data[++(markList->last)].nMarkValue1 = runList->data[j].nLabel;
+                            markList->data[markList->last].nMarkValue2 = runList->data[i].nLabel;
+                        }
                     }
                 }
             }
