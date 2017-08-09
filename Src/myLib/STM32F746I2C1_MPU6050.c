@@ -243,24 +243,7 @@ u8 MPU_Read_Byte(u8 reg)
 
 
 
-//串口发送上位机相关代码
-//传送数据给匿名四轴上位机软件(V2.6版本)
-//fun:功能字. 0XA0~0XAF
-//data:数据缓存区,最多28字节!!
-//len:data区有效数据个数
-//void usart1_niming_report(u8 fun,u8*data,u8 len)
-//{
-//	u8 send_buf[32];
-//	u8 i;
-//	if(len>28)return;	//最多28字节数据 
-//	send_buf[len+3]=0;	//校验数置零
-//	send_buf[0]=0X88;	//帧头
-//	send_buf[1]=fun;	//功能字
-//	send_buf[2]=len;	//数据长度
-//	for(i=0;i<len;i++)send_buf[3+i]=data[i];			//复制数据
-//	for(i=0;i<len+3;i++)send_buf[len+3]+=send_buf[i];	//计算校验和	
-//	for(i=0;i<len+4;i++)usart1_send_char(send_buf[i]);	//发送数据到串口1 
-//}
+
 
 
 //发送加速度传感器数据和陀螺仪数据
@@ -281,6 +264,6 @@ void mpu6050_send_data(short aacx, short aacy, short aacz, short gyrox, short gy
 	tbuf[9]=gyroy&0XFF; 
 	tbuf[10]=(gyroz>>8)&0XFF;
 	tbuf[11]= gyroz&0XFF; 
-	usart3_niming_report(0XA1,tbuf,12);//自定义帧,0XA1
+	usart2_niming_report(0XA1,tbuf,12);//自定义帧,0XA1
 }	
 

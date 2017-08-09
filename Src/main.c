@@ -41,13 +41,13 @@
 #include "dcmi.h"
 #include "dma.h"
 #include "i2c.h"
-#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 #include "fmc.h"
 
 /* USER CODE BEGIN Includes */
+#include "arm_math.h"
 #include "sdram.h"
 #include "ov2640.h"
 #include "wifi.h"
@@ -55,17 +55,15 @@
 #include "STM32F746SPI1_OLED.h"
 #include "STM32F746I2C1_MPU6050.h"
 #include "Complementary_fusion_filter.h"
+#include "Button_Process.h"
+#include "Motor.h"
 #include "delay.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-//Balance:  
-//	Motor1: 1700 
-//  Motor2: 2550
-uint16_t Motor1_PWM = 1500;
-uint16_t Motor2_PWM = 1500;
+
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE END PV */
@@ -111,31 +109,41 @@ int main(void)
   MX_DMA_Init();
   MX_DCMI_Init();
   MX_I2C2_Init();
-  MX_USART1_UART_Init();
   MX_FMC_Init();
   MX_TIM7_Init();
-  MX_USART3_UART_Init();
-  MX_SPI1_Init();
-  MX_TIM10_Init();
-  MX_TIM11_Init();
+  MX_TIM3_Init();
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
-  BSP_SDRAM_Initialization_sequence(REFRESH_COUNT);
-  ov2640_Init(ov2640_R160x120);
-  WIFI_Transparent_Init();
-  ov2640_Config(OV2640_ADDR, ov2640_CONTRAST_BRIGHTNESS, OV2640_CONTRAST_LEVEL4, OV2640_BRIGHTNESS_LEVEL0);
-  ov2640_SetYUV();
+  //BSP_SDRAM_Initialization_sequence(REFRESH_COUNT);
+  //ov2640_Init(ov2640_R160x120);
+  //WIFI_Transparent_Init();
+  //ov2640_Config(OV2640_ADDR, ov2640_CONTRAST_BRIGHTNESS, OV2640_CONTRAST_LEVEL4, OV2640_BRIGHTNESS_LEVEL0);
+  //ov2640_SetYUV();
   //ov2640_ContinuousStart(ov2640_FRAME_BUFFER);
-  ov2640_SnapshotStart(ov2640_FRAME_BUFFER);
+  //ov2640_SnapshotStart(ov2640_FRAME_BUFFER);
+
+  Statue_Init();
+  //状态初始化 在button_process文件里面
 
   OLED_Init();
+  //OLED液晶屏初始化
+
   MPU_Init();
+  //MPU6050初始化
+
+  Gyro_OFFSET();
+  //陀螺仪初始校准
+
+  MotorInit();
+  //初始化电机方向
+
+  HAL_TIM_Base_Start_IT(&htim7);   
+  //时序开始
   
-  HAL_TIM_PWM_Start(&htim10, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim11, TIM_CHANNEL_1);
 
 
-  HAL_TIM_Base_Start_IT(&htim7);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -145,6 +153,7 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+
 //    if (hdcmi.State == HAL_DCMI_STATE_SUSPENDED)
 //    {
 //      /*Process image*/
@@ -209,10 +218,10 @@ void SystemClock_Config(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_USART3
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_USART2
                               |RCC_PERIPHCLK_I2C2;
   PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
-  PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
+  PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
   PeriphClkInitStruct.I2c2ClockSelection = RCC_I2C2CLKSOURCE_PCLK1;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
@@ -249,55 +258,41 @@ static void CPU_CACHE_Enable(void)
 }
 
 
+//时序定时器中断回调函数(htim7)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if(htim->Instance == htim7.Instance)
     {
-        static uint8_t SequenceNum = 0;
+        static uint8_t SequenceNum = 0; //时序计数变量
 
         if(SequenceNum == 1)
         {
-            TIM10->CCR1 = Motor1_PWM;
-            TIM11->CCR1 = Motor2_PWM;
-			OLED_ShowNum(0, 0, Motor1_PWM, 5, 16);
-			OLED_ShowNum(0, 2, Motor2_PWM, 5, 16);
+            
         }
 
         if(SequenceNum == 4)
         {
             MPU6050_USE_Data_Get();
+            //获取MPU6050的值(包含了一阶低通滤波和IIR滤波)
+
             Complementary_Fusion_Filter();
+            //互补融合滤波提取角度
+
+            
             mpu6050_send_data(sensor.acc.origin.x, sensor.acc.origin.y, sensor.acc.origin.z, \
-                                sensor.acc.averag.x, sensor.acc.averag.y, sensor.acc.averag.z);
-			
+								sensor.gyro.origin.x, sensor.gyro.origin.y, sensor.gyro.origin.z);
+
+            //发送个上位机观察波形
+
             SequenceNum = 0;
         }
         SequenceNum++;
     }
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-    if(GPIO_Pin == REMOTE_A_Pin)
-    {
-        Motor1_PWM += 10;
-    }
 
-    if(GPIO_Pin == REMOTE_B_Pin)
-    {
-        Motor2_PWM += 10;
-    }
 
-    if(GPIO_Pin == REMOTE_C_Pin)
-    {
-        Motor1_PWM -= 10;
-    }
 
-    if(GPIO_Pin == REMOTE_D_Pin)
-    {
-        Motor2_PWM -= 10;
-    }
-}
 
 
 
