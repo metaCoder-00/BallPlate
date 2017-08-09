@@ -18,10 +18,18 @@
 #define BLACK 0
 #define WHITE 255
 
-#define GRAY_FLOOR 0
-#define GRAY_CEILING 255
+#define GRAY_FLOOR 10
+#define GRAY_CEILING 240
+
+#define AREA_TH 5
 
 #define MAX_LEN 1000
+
+typedef struct
+{
+	uint16_t row;		//行号
+	uint16_t col;		//列号
+}Position;
 
 typedef struct 
 {
@@ -64,6 +72,9 @@ extern Equals *equal;
 
 /*------------Exported functions-----------*/
 void Img_Process(void);
+void Label_Center(uint8_t **image, Position *pos);
+void Ball_Scan(void);
+void Pre_Scan(void);
 
 /*------------Private functions-----------*/
 static float Get_Histogram(uint8_t **image, float *his);
@@ -71,7 +82,6 @@ static uint8_t Osu_Threshold(float *his, float avgValue);
 static void Gray_To_BW(uint8_t **image);
 static void Run_Label(uint8_t **image);
 static void Equal_Process(uint16_t *equal, uint16_t nValue1, uint16_t nValue2);
-static void Label_Center(uint8_t **image);
 static void Mid_Filter(uint8_t **image);
 
 #endif

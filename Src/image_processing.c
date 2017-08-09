@@ -5,16 +5,38 @@ float his[MAX_HIS_LENGTH];
 RunLength *runList;
 EqualMark *markList;
 Equals *equal;
+Position region[9];
+Position ballPos;
+
+/*预扫描，用于记录板上区域的坐标*/
+void Pre_Scan(void)
+{
+    YUV2Red((YUV_Format *)ov2640_FRAME_BUFFER, (__IO uint8_t **)ov2640_GRAY_BUFFER, OV2640_IMG_HEIGHT, OV2640_IMG_WIDTH);
+    Mid_Filter((uint8_t **)ov2640_GRAY_BUFFER);
+    Gray_To_BW((uint8_t **)ov2640_GRAY_BUFFER);
+    Run_Label((uint8_t **)ov2640_GRAY_BUFFER);
+    Label_Center((uint8_t **)ov2640_GRAY_BUFFER, region);
+}
+
+/*扫描小球的坐标*/
+void Ball_Scan(void)
+{
+    YUV2Blue((YUV_Format *)ov2640_FRAME_BUFFER, (__IO uint8_t **)ov2640_GRAY_BUFFER, OV2640_IMG_HEIGHT, OV2640_IMG_WIDTH);
+    Mid_Filter((uint8_t **)ov2640_GRAY_BUFFER);
+    Gray_To_BW((uint8_t **)ov2640_GRAY_BUFFER);
+    Run_Label((uint8_t **)ov2640_GRAY_BUFFER);
+    Label_Center((uint8_t **)ov2640_GRAY_BUFFER, &ballPos);
+}
 
 void Img_Process(void)
 {
     uint16_t i;
 
-    YUV2Gray((YUV_Format *)ov2640_FRAME_BUFFER, (__IO uint8_t **)ov2640_GRAY_BUFFER, OV2640_IMG_HEIGHT, OV2640_IMG_WIDTH);
+    YUV2Red((YUV_Format *)ov2640_FRAME_BUFFER, (__IO uint8_t **)ov2640_GRAY_BUFFER, OV2640_IMG_HEIGHT, OV2640_IMG_WIDTH);
     Mid_Filter((uint8_t **)ov2640_GRAY_BUFFER);
     Gray_To_BW((uint8_t **)ov2640_GRAY_BUFFER);
     Run_Label((uint8_t **)ov2640_GRAY_BUFFER);
-    Label_Center((uint8_t **)ov2640_GRAY_BUFFER);
+    Label_Center((uint8_t **)ov2640_GRAY_BUFFER, &ballPos);
 
     /* WIFI Img Send */
     while (recv[0] != '.')
@@ -280,9 +302,9 @@ static void Equal_Process(uint16_t *equal, uint16_t nValue1, uint16_t nValue2)
 }
 
 /*标记出连通区域的中心*/
-void Label_Center(uint8_t **image)
+void Label_Center(uint8_t **image, Position *pos)
 {
-    uint16_t i, j, k;
+    uint16_t i, j, k, cnt = 0;
     float sumRow, sumCol, area;
     uint8_t level = 255 / (runList->data[runList->last].nLabel);
 
@@ -304,7 +326,14 @@ void Label_Center(uint8_t **image)
                 }
             }
         }
-        image[(uint16_t)(sumRow / area)][(uint16_t)(sumCol / area)] = WHITE;
+
+        if (area > AREA_TH)
+        {
+            image[(uint16_t)(sumRow / area)][(uint16_t)(sumCol / area)] = WHITE;
+            (pos + cnt)->row = (uint16_t)(sumRow / area);
+            (pos + cnt)->col = (uint16_t)(sumCol / area);
+            ++cnt;
+        }
     }
 }
 
