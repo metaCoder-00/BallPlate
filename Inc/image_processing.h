@@ -18,6 +18,9 @@
 #define BLACK 0
 #define WHITE 255
 
+#define GRAY_FLOOR 0
+#define GRAY_CEILING 255
+
 #define MAX_LEN 1000
 
 typedef struct 

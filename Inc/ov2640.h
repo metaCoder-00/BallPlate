@@ -156,7 +156,7 @@
 /**Frame Union */
 
 typedef union {
-  uint8_t Y;
+  uint8_t pixType[2];
   uint16_t YUV;
 } YUV_Format;
 
@@ -180,6 +180,8 @@ extern void ov2640_SnapshotStart(uint8_t *buff);
 extern uint32_t GetSize(uint32_t resolution);
 extern void ov2640_SetYUV(void);
 extern void YUV2Gray(__IO YUV_Format *src, __IO uint8_t **des, uint16_t row, uint16_t col);
+extern void YUV2Blue(__IO YUV_Format *src, __IO uint8_t **des, uint16_t row, uint16_t col);
+extern void YUV2Red(__IO YUV_Format *src, __IO uint8_t **des, uint16_t row, uint16_t col);
 
 #endif /* __OV2640_H */
 

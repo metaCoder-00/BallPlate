@@ -13,8 +13,8 @@ void Img_Process(void)
     YUV2Gray((YUV_Format *)ov2640_FRAME_BUFFER, (__IO uint8_t **)ov2640_GRAY_BUFFER, OV2640_IMG_HEIGHT, OV2640_IMG_WIDTH);
     Mid_Filter((uint8_t **)ov2640_GRAY_BUFFER);
     Gray_To_BW((uint8_t **)ov2640_GRAY_BUFFER);
-    //    Run_Label((uint8_t **)ov2640_GRAY_BUFFER);
-    //    Label_Center((uint8_t **)ov2640_GRAY_BUFFER);
+    Run_Label((uint8_t **)ov2640_GRAY_BUFFER);
+    Label_Center((uint8_t **)ov2640_GRAY_BUFFER);
 
     /* WIFI Img Send */
     while (recv[0] != '.')
@@ -98,7 +98,18 @@ static void Gray_To_BW(uint8_t **image)
     float avgGray;
 
     avgGray = Get_Histogram((uint8_t **)ov2640_GRAY_BUFFER, his);
-    threshold = Osu_Threshold(his, avgGray);
+    if (avgGray < GRAY_FLOOR)
+    {
+        threshold = 255;
+    }
+    else if (avgGray > GRAY_CEILING)
+    {
+        threshold = 0;
+    }
+    else
+    {
+        threshold = Osu_Threshold(his, avgGray);
+    }
 
     for (i = 0; i < IMAGE_HEIGHT; ++i)
     {
@@ -273,9 +284,9 @@ void Label_Center(uint8_t **image)
 {
     uint16_t i, j, k;
     float sumRow, sumCol, area;
-    uint8_t level = 256 / (runList->data[runList->last].nLabel);
+    uint8_t level = 255 / (runList->data[runList->last].nLabel);
 
-    for (k = 1; k < runList->data[runList->last].nLabel; ++k)
+    for (k = 1; k <= runList->data[runList->last].nLabel; ++k)
     {
         sumRow = 0;
         sumCol = 0;
