@@ -211,6 +211,9 @@ void usart2_send_char(uint8_t c)
 	HAL_UART_Transmit(&huart2, &c, 1, 0xFFFF); 
 } 
 
+
+
+
 void usart2_niming_report(uint8_t fun, uint8_t *data, uint8_t len)
 {
 	uint8_t send_buf[32];

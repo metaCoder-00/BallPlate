@@ -55,17 +55,15 @@
 #include "STM32F746SPI1_OLED.h"
 #include "STM32F746I2C1_MPU6050.h"
 #include "Complementary_fusion_filter.h"
+#include "Button_Process.h"
+#include "Motor.h"
 #include "delay.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-//Balance:  
-//	Motor1: 1700 
-//  Motor2: 2550
-uint16_t Motor1_PWM = 1500;
-uint16_t Motor2_PWM = 1500;
+
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE END PV */
@@ -126,12 +124,26 @@ int main(void)
   //ov2640_ContinuousStart(ov2640_FRAME_BUFFER);
   //ov2640_SnapshotStart(ov2640_FRAME_BUFFER);
 
+  Statue_Init();
+  //状态初始化 在button_process文件里面
+
   OLED_Init();
+  //OLED液晶屏初始化
+
   MPU_Init();
+  //MPU6050初始化
+
   Gyro_OFFSET();
+  //陀螺仪初始校准
+
+  MotorInit();
+  //初始化电机方向
+
+  HAL_TIM_Base_Start_IT(&htim7);   
+  //时序开始
+  
 
 
-  HAL_TIM_Base_Start_IT(&htim7);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -141,6 +153,7 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+
 //    if (hdcmi.State == HAL_DCMI_STATE_SUSPENDED)
 //    {
 //      /*Process image*/
@@ -245,29 +258,40 @@ static void CPU_CACHE_Enable(void)
 }
 
 
+//时序定时器中断回调函数(htim7)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if(htim->Instance == htim7.Instance)
     {
-        static uint8_t SequenceNum = 0;
+        static uint8_t SequenceNum = 0; //时序计数变量
 
         if(SequenceNum == 1)
         {
-			
+            
         }
 
         if(SequenceNum == 4)
         {
             MPU6050_USE_Data_Get();
+            //获取MPU6050的值(包含了一阶低通滤波和IIR滤波)
+
             Complementary_Fusion_Filter();
+            //互补融合滤波提取角度
+
+            
             mpu6050_send_data(sensor.acc.origin.x, sensor.acc.origin.y, sensor.acc.origin.z, \
-                                 sensor.gyro.origin.x, sensor.gyro.origin.y, sensor.gyro.origin.z);
-			
+								sensor.gyro.origin.x, sensor.gyro.origin.y, sensor.gyro.origin.z);
+
+            //发送个上位机观察波形
+
             SequenceNum = 0;
         }
         SequenceNum++;
     }
 }
+
+
+
 
 
 
