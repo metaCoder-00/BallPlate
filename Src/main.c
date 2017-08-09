@@ -120,11 +120,11 @@ int main(void)
   MX_TIM11_Init();
 
   /* USER CODE BEGIN 2 */
-  //BSP_SDRAM_Initialization_sequence(REFRESH_COUNT);
-  //ov2640_Init(ov2640_R160x120);
-  //WIFI_Transparent_Init();
-  //ov2640_SetYUV();
-  //ov2640_ContinuousStart(ov2640_FRAME_BUFFER);
+  BSP_SDRAM_Initialization_sequence(REFRESH_COUNT);
+  ov2640_Init(ov2640_R160x120);
+  WIFI_Transparent_Init();
+  ov2640_SetYUV();
+  ov2640_ContinuousStart(ov2640_FRAME_BUFFER);
 
   OLED_Init();
   MPU_Init();
