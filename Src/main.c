@@ -116,33 +116,34 @@ int main(void)
   MX_TIM12_Init();
 
   /* USER CODE BEGIN 2 */
-  //BSP_SDRAM_Initialization_sequence(REFRESH_COUNT);
-  //ov2640_Init(ov2640_R160x120);
+  BSP_SDRAM_Initialization_sequence(REFRESH_COUNT);
+  ov2640_Init(ov2640_R160x120);
   //WIFI_Transparent_Init();
-  //ov2640_Config(OV2640_ADDR, ov2640_CONTRAST_BRIGHTNESS, OV2640_CONTRAST_LEVEL4, OV2640_BRIGHTNESS_LEVEL0);
-  //ov2640_SetYUV();
+  ov2640_Config(OV2640_ADDR, ov2640_CONTRAST_BRIGHTNESS, OV2640_CONTRAST_LEVEL4, OV2640_BRIGHTNESS_LEVEL0);
+  ov2640_SetYUV();
   //ov2640_ContinuousStart(ov2640_FRAME_BUFFER);
-  //ov2640_SnapshotStart(ov2640_FRAME_BUFFER);
+  ov2640_SnapshotStart(ov2640_FRAME_BUFFER);
 
-  Statue_Init();
-  //状�?�初始化 在button_process文件里面
+//   Statue_Init();
+//   //状�?�初始化 在button_process文件里面
 
-  OLED_Init();
-  //OLED液晶屏初始化
+//   OLED_Init();
+//   //OLED液晶屏初始化
 
-  MPU_Init();
-  //MPU6050初始�???
+//   MPU_Init();
+//   //MPU6050初始�?
 
-  Gyro_OFFSET();
-  //�???螺仪初始校准
+//   Gyro_OFFSET();
+//   //�?螺仪初始校准
 
-  MotorInit();
-  //初始化电机方�???
+//   MotorInit();
+//   //初始化电�?
 
-  
+//   X_MotorStop();
+//   Y_MotorStop();
 
-  HAL_TIM_Base_Start_IT(&htim7);   
-  //时序�???�???
+//   HAL_TIM_Base_Start_IT(&htim7);   
+  //时序定时器中断使�?
   
 
   //MotorStop();
@@ -262,7 +263,7 @@ static void CPU_CACHE_Enable(void)
 }
 
 
-//时序定时器中断回调函�???(htim7)
+//时序定时器中断回调函�????(htim7)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if(htim->Instance == htim7.Instance)
@@ -299,7 +300,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         if(SequenceNum == 5)
         {
             MPU6050_USE_Data_Get();
-            //获取MPU6050的�??(包含了一阶低通滤波和IIR滤波)
+            //获取MPU6050的数�?(包含了一阶低通滤波和IIR滤波)
 
             Complementary_Fusion_Filter();
             //互补融合滤波提取角度
@@ -320,7 +321,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             mpu6050_send_data(sensor.acc.origin.x, sensor.acc.origin.y, sensor.gyro.origin.x, \
 								Real_Angle.X_Real_Angle, Real_Angle.Y_Real_Angle, sensor.gyro.origin.y);
 
-            //发�?�个上位机观察波�???
+            //发�?�上位机观察波形
 
             SequenceNum = 0;
         }
