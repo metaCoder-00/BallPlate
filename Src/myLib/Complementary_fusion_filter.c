@@ -2,19 +2,13 @@
 #include "usart.h"
 #include "mpu6050_filter.h"
 
-float gyro_integration = 0;
-float Real_Angle = 0;
+_Real_Angle Real_Angle;
 
 
-float Complementary_Fusion_Filter(void)
+void Complementary_Fusion_Filter(void)
 {
-	gyro_integration = (sensor.gyro.origin.y) + gyro_integration;
-	
-	Real_Angle = (Real_Angle + sensor.gyro.averag.y * 0.008f) * 0.88f + sensor.acc.averag.y * 0.12f;
-	
-	//Angle_send_data(sensor.acc.origin.y, sensor.acc.averag.y, Real_Angle);
-	return Real_Angle;
-	
+    Real_Angle.X_Real_Angle = (Real_Angle.X_Real_Angle + sensor.gyro.averag.x * 0.008f) * 0.88f + sensor.acc.averag.x * 0.12f;
+    Real_Angle.Y_Real_Angle = (Real_Angle.Y_Real_Angle + sensor.gyro.averag.y * 0.008f) * 0.88f + sensor.acc.averag.y * 0.12f;	
 }
 
 void Angle_send_data(short Gyro_Integer, short Acc, short Real_Angle)

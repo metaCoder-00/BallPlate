@@ -47,7 +47,6 @@
 #include "fmc.h"
 
 /* USER CODE BEGIN Includes */
-#include "arm_math.h"
 #include "sdram.h"
 #include "ov2640.h"
 #include "wifi.h"
@@ -114,6 +113,7 @@ int main(void)
   MX_TIM3_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+  MX_TIM12_Init();
 
   /* USER CODE BEGIN 2 */
   //BSP_SDRAM_Initialization_sequence(REFRESH_COUNT);
@@ -125,24 +125,28 @@ int main(void)
   //ov2640_SnapshotStart(ov2640_FRAME_BUFFER);
 
   Statue_Init();
-  //状态初始化 在button_process文件里面
+  //状�?�初始化 在button_process文件里面
 
   OLED_Init();
   //OLED液晶屏初始化
 
   MPU_Init();
-  //MPU6050初始化
+  //MPU6050初始�???
 
   Gyro_OFFSET();
-  //陀螺仪初始校准
+  //�???螺仪初始校准
 
   MotorInit();
-  //初始化电机方向
+  //初始化电机方�???
 
-  HAL_TIM_Base_Start_IT(&htim7);   
-  //时序开始
   
 
+  HAL_TIM_Base_Start_IT(&htim7);   
+  //时序�???�???
+  
+
+  //MotorStop();
+  
 
   /* USER CODE END 2 */
 
@@ -258,31 +262,65 @@ static void CPU_CACHE_Enable(void)
 }
 
 
-//时序定时器中断回调函数(htim7)
+//时序定时器中断回调函�???(htim7)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if(htim->Instance == htim7.Instance)
     {
         static uint8_t SequenceNum = 0; //时序计数变量
+        //static int8_t PWM = 0;
+        //static uint8_t flag = 0;
+
 
         if(SequenceNum == 1)
         {
+            // Y_Motor_Control(PWM);
             
+            // if(flag == 0)
+            // {
+            //     PWM+=1;
+            //     if(PWM == 100)
+            //     {
+            //         flag = 1;
+            //     }
+            // }
+
+            // if(flag == 1)
+            // {
+            //     PWM-=1;
+            //     if(PWM == -100)
+            //     {
+            //         flag = 0;
+            //     }
+            // }
         }
 
-        if(SequenceNum == 4)
+
+        if(SequenceNum == 5)
         {
             MPU6050_USE_Data_Get();
-            //获取MPU6050的值(包含了一阶低通滤波和IIR滤波)
+            //获取MPU6050的�??(包含了一阶低通滤波和IIR滤波)
 
             Complementary_Fusion_Filter();
             //互补融合滤波提取角度
 
-            
-            mpu6050_send_data(sensor.acc.origin.x, sensor.acc.origin.y, sensor.acc.origin.z, \
-								sensor.gyro.origin.x, sensor.gyro.origin.y, sensor.gyro.origin.z);
 
-            //发送个上位机观察波形
+            if(Real_Angle.X_Real_Angle < 1530 || Real_Angle.X_Real_Angle > 1570)
+            {
+                X_MotorStop();
+            }
+
+            if(Real_Angle.Y_Real_Angle < 1325 || Real_Angle.Y_Real_Angle > 1365)
+            {
+                Y_MotorStop();
+            }
+
+
+            //mpu6050_send_data((200000/TIM3->PSC), PWM, TIM12->PSC, TIM12->PSC, TIM12->PSC, TIM12->PSC);
+            mpu6050_send_data(sensor.acc.origin.x, sensor.acc.origin.y, sensor.gyro.origin.x, \
+								Real_Angle.X_Real_Angle, Real_Angle.Y_Real_Angle, sensor.gyro.origin.y);
+
+            //发�?�个上位机观察波�???
 
             SequenceNum = 0;
         }

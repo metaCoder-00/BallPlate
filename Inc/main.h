@@ -48,21 +48,21 @@
 
 #define REMOTE_A_Pin GPIO_PIN_0
 #define REMOTE_A_GPIO_Port GPIOC
-#define REMOTE_A_EXTI_IRQn EXTI0_IRQn
 #define REMOTE_B_Pin GPIO_PIN_1
 #define REMOTE_B_GPIO_Port GPIOC
-#define REMOTE_B_EXTI_IRQn EXTI1_IRQn
 #define REMOTE_C_Pin GPIO_PIN_2
 #define REMOTE_C_GPIO_Port GPIOC
-#define REMOTE_C_EXTI_IRQn EXTI2_IRQn
 #define REMOTE_D_Pin GPIO_PIN_3
 #define REMOTE_D_GPIO_Port GPIOC
-#define REMOTE_D_EXTI_IRQn EXTI3_IRQn
 #define OLED_RES_Pin GPIO_PIN_0
 #define OLED_RES_GPIO_Port GPIOB
 #define OLED_DC_Pin GPIO_PIN_1
 #define OLED_DC_GPIO_Port GPIOB
-#define MOTOR_X_Direction_Pin GPIO_PIN_2
+#define MOTOR_X_Enable_Pin GPIO_PIN_13
+#define MOTOR_X_Enable_GPIO_Port GPIOB
+#define MOTOR_X_Driver_Pin GPIO_PIN_14
+#define MOTOR_X_Driver_GPIO_Port GPIOB
+#define MOTOR_X_Direction_Pin GPIO_PIN_15
 #define MOTOR_X_Direction_GPIO_Port GPIOB
 #define OLED_SDA_Pin GPIO_PIN_8
 #define OLED_SDA_GPIO_Port GPIOC
@@ -80,8 +80,8 @@
 #define MOTOR_Y_Direction_GPIO_Port GPIOB
 #define MOTOR_Y_Driver_Pin GPIO_PIN_4
 #define MOTOR_Y_Driver_GPIO_Port GPIOB
-#define MOTOR_X_Driver_Pin GPIO_PIN_5
-#define MOTOR_X_Driver_GPIO_Port GPIOB
+#define MOTOR_Y_Enable_Pin GPIO_PIN_5
+#define MOTOR_Y_Enable_GPIO_Port GPIOB
 #define MPU6050_SCL_Pin GPIO_PIN_6
 #define MPU6050_SCL_GPIO_Port GPIOB
 #define MPU6050_SDA_Pin GPIO_PIN_7

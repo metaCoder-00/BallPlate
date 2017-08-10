@@ -46,6 +46,7 @@
 
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim7;
+TIM_HandleTypeDef htim12;
 
 /* TIM3 init function */
 void MX_TIM3_Init(void)
@@ -54,7 +55,7 @@ void MX_TIM3_Init(void)
   TIM_OC_InitTypeDef sConfigOC;
 
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 50-1;
+  htim3.Init.Prescaler = 3000-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 100-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -76,11 +77,6 @@ void MX_TIM3_Init(void)
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -111,6 +107,34 @@ void MX_TIM7_Init(void)
   }
 
 }
+/* TIM12 init function */
+void MX_TIM12_Init(void)
+{
+  TIM_OC_InitTypeDef sConfigOC;
+
+  htim12.Instance = TIM12;
+  htim12.Init.Prescaler = 3000-1;
+  htim12.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim12.Init.Period = 100-1;
+  htim12.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim12.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim12) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 50;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim12, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  HAL_TIM_MspPostInit(&htim12);
+
+}
 
 void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* tim_pwmHandle)
 {
@@ -125,6 +149,17 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* tim_pwmHandle)
   /* USER CODE BEGIN TIM3_MspInit 1 */
 
   /* USER CODE END TIM3_MspInit 1 */
+  }
+  else if(tim_pwmHandle->Instance==TIM12)
+  {
+  /* USER CODE BEGIN TIM12_MspInit 0 */
+
+  /* USER CODE END TIM12_MspInit 0 */
+    /* TIM12 clock enable */
+    __HAL_RCC_TIM12_CLK_ENABLE();
+  /* USER CODE BEGIN TIM12_MspInit 1 */
+
+  /* USER CODE END TIM12_MspInit 1 */
   }
 }
 
@@ -156,21 +191,39 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
   /* USER CODE BEGIN TIM3_MspPostInit 0 */
 
   /* USER CODE END TIM3_MspPostInit 0 */
-  
     /**TIM3 GPIO Configuration    
-    PB4     ------> TIM3_CH1
-    PB5     ------> TIM3_CH2 
+    PB4     ------> TIM3_CH1 
     */
-    GPIO_InitStruct.Pin = MOTOR_Y_Driver_Pin|MOTOR_X_Driver_Pin;
+    GPIO_InitStruct.Pin = MOTOR_Y_Driver_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(MOTOR_Y_Driver_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN TIM3_MspPostInit 1 */
 
   /* USER CODE END TIM3_MspPostInit 1 */
+  }
+  else if(timHandle->Instance==TIM12)
+  {
+  /* USER CODE BEGIN TIM12_MspPostInit 0 */
+
+  /* USER CODE END TIM12_MspPostInit 0 */
+  
+    /**TIM12 GPIO Configuration    
+    PB14     ------> TIM12_CH1 
+    */
+    GPIO_InitStruct.Pin = MOTOR_X_Driver_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF9_TIM12;
+    HAL_GPIO_Init(MOTOR_X_Driver_GPIO_Port, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN TIM12_MspPostInit 1 */
+
+  /* USER CODE END TIM12_MspPostInit 1 */
   }
 
 }
@@ -188,6 +241,17 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* tim_pwmHandle)
   /* USER CODE BEGIN TIM3_MspDeInit 1 */
 
   /* USER CODE END TIM3_MspDeInit 1 */
+  }
+  else if(tim_pwmHandle->Instance==TIM12)
+  {
+  /* USER CODE BEGIN TIM12_MspDeInit 0 */
+
+  /* USER CODE END TIM12_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_TIM12_CLK_DISABLE();
+  /* USER CODE BEGIN TIM12_MspDeInit 1 */
+
+  /* USER CODE END TIM12_MspDeInit 1 */
   }
 }
 
