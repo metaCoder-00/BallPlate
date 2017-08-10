@@ -32,11 +32,11 @@ void Img_Process(void)
 {
     uint16_t i;
 
-    YUV2Blue((YUV_Format *)ov2640_FRAME_BUFFER, (__IO uint8_t **)ov2640_GRAY_BUFFER, OV2640_IMG_HEIGHT, OV2640_IMG_WIDTH);
-    Mid_Filter((uint8_t **)ov2640_GRAY_BUFFER);
-    Gray_To_BW((uint8_t **)ov2640_GRAY_BUFFER);
-    // Run_Label((uint8_t **)ov2640_GRAY_BUFFER);
-    // Label_Center((uint8_t **)ov2640_GRAY_BUFFER, &ballPos);
+    // YUV2Gray((YUV_Format *)ov2640_FRAME_BUFFER, (__IO uint8_t **)ov2640_GRAY_BUFFER, OV2640_IMG_HEIGHT, OV2640_IMG_WIDTH);
+    // Mid_Filter((uint8_t **)ov2640_GRAY_BUFFER);
+
+    Pre_Scan();
+    // Ball_Scan();
 
     /* WIFI Img Send */
     while (recv[0] != '.')

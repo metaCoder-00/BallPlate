@@ -11,17 +11,17 @@
 #include "wifi.h"
 
 #define MAX_HIS_LENGTH 256
-#define IMAGE_HEIGHT 120
-#define IMAGE_WIDTH 160
+#define IMAGE_HEIGHT OV2640_IMG_HEIGHT
+#define IMAGE_WIDTH OV2640_IMG_WIDTH
 #define IMAGE_SIZE ((IMAGE_HEIGHT) * (IMAGE_WIDTH))
 
 #define BLACK 0
 #define WHITE 255
 
-#define GRAY_FLOOR 10
-#define GRAY_CEILING 240
+#define GRAY_FLOOR 5
+#define GRAY_CEILING 250
 
-#define AREA_TH 5
+#define AREA_TH 4
 
 #define MAX_LEN 1000
 
