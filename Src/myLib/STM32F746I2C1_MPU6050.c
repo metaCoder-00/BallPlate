@@ -15,11 +15,18 @@ u8 MPU_Init(void)
     delay_ms2(100);
 	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X00);	//唤醒MPU6050 
 	delay_ms2(100);
-	MPU_Set_Gyro_Fsr(3);					//陀螺仪传感器,±2000dps
+    
+    MPU_Set_Gyro_Fsr(3);					//陀螺仪传感器,±2000dps
 	MPU_Set_Accel_Fsr(0);					//加速度传感器,±2g
 	MPU_Set_Rate(50);						//设置采样率50Hz
 	MPU_Write_Byte(MPU_CFG_REG, 0x03);		//低通滤波42HZ
-	MPU_Write_Byte(MPU_INT_EN_REG,0X00);	//关闭所有中断
+	
+    // MPU_Write_Byte(MPU_SAMPLE_RATE_REG, 0x07);
+    // MPU_Write_Byte(MPU_CFG_REG, 0x06);
+    // MPU_Write_Byte(MPU_GYRO_CFG_REG, 0x18);
+    // MPU_Write_Byte(MPU_ACCEL_CFG_REG,0x01);
+    
+    MPU_Write_Byte(MPU_INT_EN_REG,0X00);	//关闭所有中断
 	MPU_Write_Byte(MPU_USER_CTRL_REG,0X00);	//I2C主模式关闭
 	MPU_Write_Byte(MPU_FIFO_EN_REG,0X00);	//关闭FIFO
 	MPU_Write_Byte(MPU_INTBP_CFG_REG,0X80);	//INT引脚低电平有效
