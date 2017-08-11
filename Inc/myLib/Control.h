@@ -5,9 +5,9 @@
 #include "arm_math.h"
 
 
-int16_t X_LQR_Control(int16_t x, uint16_t dx, int16_t x_angle, int16_t x_palstance);
+int16_t X_LQR_Control(int16_t x, int16_t dx, int16_t x_angle, int16_t x_palstance);
 
-int16_t Y_LQR_Control(int16_t y, uint16_t dy, int16_t y_angle, int16_t y_palstance);
+int16_t Y_LQR_Control(int16_t y, int16_t dy, int16_t y_angle, int16_t y_palstance);
 
 
 

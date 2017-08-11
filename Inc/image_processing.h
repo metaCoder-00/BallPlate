@@ -11,19 +11,30 @@
 #include "wifi.h"
 
 #define MAX_HIS_LENGTH 256
-#define IMAGE_HEIGHT 120
-#define IMAGE_WIDTH 160
+#define IMAGE_HEIGHT OV2640_IMG_HEIGHT
+#define IMAGE_WIDTH OV2640_IMG_WIDTH
 #define IMAGE_SIZE ((IMAGE_HEIGHT) * (IMAGE_WIDTH))
 
 #define BLACK 0
 #define WHITE 255
 
-#define GRAY_FLOOR 10
-#define GRAY_CEILING 240
+#define GRAY_TH_FLOOR 130
+#define GRAY_TH_CEILING 140
 
-#define AREA_TH 5
+#define AREA_TH 4
+
+#define MAX_BALL_DISTANCE 20000
+#define MAX_REGION_DISTANCE 4500
+#define MIN_REGION_DISTANCE 1000
 
 #define MAX_LEN 1000
+
+typedef enum
+{
+	PRE_SCAN,
+	BALL_SCAN,
+	WAIT,
+}Scan_Status;
 
 typedef struct
 {
@@ -69,10 +80,12 @@ extern float his[MAX_HIS_LENGTH];
 extern RunLength *runList;
 extern EqualMark *markList;
 extern Equals *equal;
+extern __IO Scan_Status thisStatus;
+extern Position region[9];
+extern Position ballPos[3];
 
 /*------------Exported functions-----------*/
 void Img_Process(void);
-void Label_Center(uint8_t **image, Position *pos);
 void Ball_Scan(void);
 void Pre_Scan(void);
 
@@ -83,5 +96,6 @@ static void Gray_To_BW(uint8_t **image);
 static void Run_Label(uint8_t **image);
 static void Equal_Process(uint16_t *equal, uint16_t nValue1, uint16_t nValue2);
 static void Mid_Filter(uint8_t **image);
+static void Label_Center(uint8_t **image, Position *pos, Scan_Status thisStatus);
 
 #endif

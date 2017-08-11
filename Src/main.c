@@ -1,3 +1,4 @@
+
 /**
   ******************************************************************************
   * File Name          : main.c
@@ -56,13 +57,15 @@
 #include "Complementary_fusion_filter.h"
 #include "Button_Process.h"
 #include "Motor.h"
+#include "Control.h"
 #include "delay.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+#define WARNING_ON() HAL_GPIO_WritePin(OLED_SCL_GPIO_Port, OLED_SCL_Pin, GPIO_PIN_SET)
+#define WARNING_OFF() HAL_GPIO_WritePin(OLED_SCL_GPIO_Port, OLED_SCL_Pin, GPIO_PIN_RESET)
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE END PV */
@@ -73,6 +76,7 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 static void CPU_CACHE_Enable(void);
+
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -82,92 +86,102 @@ static void CPU_CACHE_Enable(void);
 int main(void)
 {
 
-  /* USER CODE BEGIN 1 */
+    /* USER CODE BEGIN 1 */
 
-  CPU_CACHE_Enable();
-  /* USER CODE END 1 */
+    CPU_CACHE_Enable();
+    /* USER CODE END 1 */
 
-  /* MCU Configuration----------------------------------------------------------*/
+    /* MCU Configuration----------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+    HAL_Init();
 
-  /* USER CODE BEGIN Init */
+    /* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+    /* Configure the system clock */
+    SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+    /* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+    /* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_DCMI_Init();
-  MX_I2C2_Init();
-  MX_FMC_Init();
-  MX_TIM7_Init();
-  MX_TIM3_Init();
-  MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
-  MX_TIM12_Init();
+    /* Initialize all configured peripherals */
+    MX_GPIO_Init();
+    MX_DMA_Init();
+    MX_DCMI_Init();
+    MX_I2C2_Init();
+    MX_FMC_Init();
+    MX_TIM7_Init();
+    MX_TIM3_Init();
+    MX_USART1_UART_Init();
+    MX_USART2_UART_Init();
+    MX_TIM12_Init();
 
-  /* USER CODE BEGIN 2 */
-  BSP_SDRAM_Initialization_sequence(REFRESH_COUNT);
-  ov2640_Init(ov2640_R160x120);
-  //WIFI_Transparent_Init();
-  ov2640_Config(OV2640_ADDR, ov2640_CONTRAST_BRIGHTNESS, OV2640_CONTRAST_LEVEL4, OV2640_BRIGHTNESS_LEVEL0);
-  ov2640_SetYUV();
-  //ov2640_ContinuousStart(ov2640_FRAME_BUFFER);
-  ov2640_SnapshotStart(ov2640_FRAME_BUFFER);
+    /* USER CODE BEGIN 2 */
+    BSP_SDRAM_Initialization_sequence(REFRESH_COUNT);
+    ov2640_Init(ov2640_R160x120);
+    // WIFI_Transparent_Init();
+    ov2640_Config(OV2640_ADDR, ov2640_CONTRAST_BRIGHTNESS, OV2640_CONTRAST_LEVEL4, OV2640_BRIGHTNESS_LEVEL0);
+    ov2640_SetYUV();
+    //   ov2640_ContinuousStart(ov2640_FRAME_BUFFER);
+    ov2640_SnapshotStart(ov2640_FRAME_BUFFER);
 
-//   Statue_Init();
-//   //状�?�初始化 在button_process文件里面
+    Statue_Init();
+    //状态初始化 在button_process文件里面
 
-//   OLED_Init();
-//   //OLED液晶屏初始化
+    //OLED_Init();
+    //OLED液晶屏初始化
 
-//   MPU_Init();
-//   //MPU6050初始�?
+    MPU_Init();
+    //MPU6050初始化
 
-//   Gyro_OFFSET();
-//   //�?螺仪初始校准
+    Gyro_OFFSET();
+    //陀螺仪初始校准
 
-//   MotorInit();
-//   //初始化电�?
+    MotorInit();
+    //初始化电机
 
-//   X_MotorStop();
-//   Y_MotorStop();
+    while (thisStatus != BALL_SCAN);
+    //等待直到预扫描完成
 
-//   HAL_TIM_Base_Start_IT(&htim7);   
-  //时序定时器中断使�?
-  
+    X_MotorStop();
+	Y_MotorStop();    
+    //电机抱死并延时
 
-  //MotorStop();
-  
+    delay_ms2(1000);
+    delay_ms2(1000);
 
-  /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-  /* USER CODE END WHILE */
+    HAL_TIM_Base_Start_IT(&htim7);
+    //时序中断开始
 
-  /* USER CODE BEGIN 3 */
+    WARNING_OFF();
+	
 
-//    if (hdcmi.State == HAL_DCMI_STATE_SUSPENDED)
-//    {
-//      /*Process image*/
-//      Img_Process();
-//      HAL_DCMI_Resume(&hdcmi);
-//    }
-  }
-  /* USER CODE END 3 */
 
+
+
+    
+    /* USER CODE END 2 */
+
+    /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
+    while (1)
+    {
+        /* USER CODE END WHILE */
+
+        /* USER CODE BEGIN 3 */
+
+        //    if (hdcmi.State == HAL_DCMI_STATE_SUSPENDED)
+        //    {
+        //      /*Process image*/
+        //      Img_Process();
+        //      HAL_DCMI_Resume(&hdcmi);
+        //    }
+    }
+    /* USER CODE END 3 */
 }
 
 /** System Clock Configuration
@@ -175,76 +189,74 @@ int main(void)
 void SystemClock_Config(void)
 {
 
-  RCC_OscInitTypeDef RCC_OscInitStruct;
-  RCC_ClkInitTypeDef RCC_ClkInitStruct;
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
+    RCC_OscInitTypeDef RCC_OscInitStruct;
+    RCC_ClkInitTypeDef RCC_ClkInitStruct;
+    RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
 
     /**Configure the main internal regulator output voltage 
     */
-  __HAL_RCC_PWR_CLK_ENABLE();
+    __HAL_RCC_PWR_CLK_ENABLE();
 
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = 16;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 200;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 2;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.HSICalibrationValue = 16;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 4;
+    RCC_OscInitStruct.PLL.PLLN = 200;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = 2;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    {
+        _Error_Handler(__FILE__, __LINE__);
+    }
 
     /**Activate the Over-Drive mode 
     */
-  if (HAL_PWREx_EnableOverDrive() != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    if (HAL_PWREx_EnableOverDrive() != HAL_OK)
+    {
+        _Error_Handler(__FILE__, __LINE__);
+    }
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6) != HAL_OK)
+    {
+        _Error_Handler(__FILE__, __LINE__);
+    }
 
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_USART2
-                              |RCC_PERIPHCLK_I2C2;
-  PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
-  PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-  PeriphClkInitStruct.I2c2ClockSelection = RCC_I2C2CLKSOURCE_PCLK1;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART1 | RCC_PERIPHCLK_USART2 | RCC_PERIPHCLK_I2C2;
+    PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
+    PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+    PeriphClkInitStruct.I2c2ClockSelection = RCC_I2C2CLKSOURCE_PCLK1;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    {
+        _Error_Handler(__FILE__, __LINE__);
+    }
 
-  HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI, RCC_MCODIV_1);
+    HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI, RCC_MCODIV_1);
 
     /**Configure the Systick interrupt time 
     */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+    HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 
     /**Configure the Systick 
     */
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+    HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
-  /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+    /* SysTick_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
 /* USER CODE BEGIN 4 */
@@ -255,86 +267,114 @@ void SystemClock_Config(void)
   */
 static void CPU_CACHE_Enable(void)
 {
-  /* Enable I-Cache */
-  SCB_EnableICache();
+    /* Enable I-Cache */
+    SCB_EnableICache();
 
-  /* Enable D-Cache */
-  SCB_EnableDCache();
+    /* Enable D-Cache */
+    SCB_EnableDCache();
 }
 
-
-//时序定时器中断回调函�????(htim7)
+//时序定时器中断回调函数(htim7)
+int16_t X_PWM = 0;
+int16_t Y_PWM = 0;
+int16_t dx = 0;
+int16_t dy = 0;
+int16_t x = 0;
+int16_t y = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    if(htim->Instance == htim7.Instance)
+	
+
+	
+    if (htim->Instance == htim7.Instance)
     {
         static uint8_t SequenceNum = 0; //时序计数变量
         //static int8_t PWM = 0;
         //static uint8_t flag = 0;
 
-
-        if(SequenceNum == 1)
-        {
-            // Y_Motor_Control(PWM);
-            
-            // if(flag == 0)
-            // {
-            //     PWM+=1;
-            //     if(PWM == 100)
-            //     {
-            //         flag = 1;
-            //     }
-            // }
-
-            // if(flag == 1)
-            // {
-            //     PWM-=1;
-            //     if(PWM == -100)
-            //     {
-            //         flag = 0;
-            //     }
-            // }
-        }
-
-
-        if(SequenceNum == 5)
+        
+        if (SequenceNum == 1)
         {
             MPU6050_USE_Data_Get();
-            //获取MPU6050的数�?(包含了一阶低通滤波和IIR滤波)
+            //获取MPU6050的数据(包含了一阶低通滤波和IIR滤波)
 
             Complementary_Fusion_Filter();
             //互补融合滤波提取角度
 
-
-            if(Real_Angle.X_Real_Angle < 1530 || Real_Angle.X_Real_Angle > 1570)
+            if (Real_Angle.X_Real_Angle < -1200 || Real_Angle.X_Real_Angle > 1500)
             {
                 X_MotorStop();
-            }
-
-            if(Real_Angle.Y_Real_Angle < 1325 || Real_Angle.Y_Real_Angle > 1365)
-            {
                 Y_MotorStop();
+                WARNING_ON();
             }
+            else if (Real_Angle.Y_Real_Angle < -1500 || Real_Angle.Y_Real_Angle > 1500)
+            {
+                X_MotorStop();
+                Y_MotorStop();
+                WARNING_ON();
+            }
+            else
+            {
+                WARNING_OFF();
+            }
+            // if(Real_Angle.X_Real_Angle > 1500)
+            //  {
+            //     Direction_X_back_1();
+            //  }
+
+            // if(Real_Angle.X_Real_Angle < -400)
+            // {
+            //     Direction_X_to_1();
+            // }
+
+            // if (Real_Angle.Y_Real_Angle > 1100)
+            // {
+            //     Direction_Y_back_2();
+            // }
+            // if (Real_Angle.Y_Real_Angle < -1100)
+            // {
+            //     Direction_Y_to_2();
+            // }
+
+            //mpu6050_send_data(sensor.acc.origin.x, sensor.acc.origin.y, sensor.gyro.origin.x, \
+                               Real_Angle.X_Real_Angle, Real_Angle.Y_Real_Angle, sensor.gyro.origin.y);
+
+            //发送上位机观察波形
+
+            
+        }
 
 
-            //mpu6050_send_data((200000/TIM3->PSC), PWM, TIM12->PSC, TIM12->PSC, TIM12->PSC, TIM12->PSC);
-            mpu6050_send_data(sensor.acc.origin.x, sensor.acc.origin.y, sensor.gyro.origin.x, \
-								Real_Angle.X_Real_Angle, Real_Angle.Y_Real_Angle, sensor.gyro.origin.y);
+        
+        if (SequenceNum == 10)
+        {
+            
 
-            //发�?�上位机观察波形
+            x = ballPos[0].col - region[4].col;
+            y = ballPos[0].row - region[4].row;
+
+            dy = ballPos[0].row - ballPos[1].row;
+            dx = ballPos[0].col - ballPos[1].col;
+
+            X_PWM = X_LQR_Control(x, dx, Real_Angle.X_Real_Angle, sensor.gyro.origin.x);
+            Y_PWM = Y_LQR_Control(y, dy, Real_Angle.Y_Real_Angle, sensor.gyro.origin.y);
+
+            //X_Motor_Control(Y_PWM);
+            //Y_Motor_Control(X_PWM);
+
+            mpu6050_send_data(X_PWM, Y_PWM, sensor.gyro.averag.x, \
+                    sensor.gyro.averag.y, Real_Angle.X_Real_Angle, Real_Angle.Y_Real_Angle);
+
+            //mpu6050_send_data(sensor.acc.origin.x, sensor.acc.origin.y, sensor.gyro.origin.x,  \
+                               Real_Angle.X_Real_Angle, Real_Angle.Y_Real_Angle, sensor.gyro.origin.y);  
+
+  
 
             SequenceNum = 0;
         }
         SequenceNum++;
     }
 }
-
-
-
-
-
-
-
 
 /* USER CODE END 4 */
 
@@ -343,14 +383,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   * @param  None
   * @retval None
   */
-void _Error_Handler(char * file, int line)
+void _Error_Handler(char *file, int line)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  while (1)
-  {
-  }
-  /* USER CODE END Error_Handler_Debug */ 
+    /* USER CODE BEGIN Error_Handler_Debug */
+    /* User can add his own implementation to report the HAL error return state */
+    while (1)
+    {
+    }
+    /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef USE_FULL_ASSERT
@@ -362,23 +402,22 @@ void _Error_Handler(char * file, int line)
    * @param line: assert_param error line source number
    * @retval None
    */
-void assert_failed(uint8_t* file, uint32_t line)
+void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
+    /* USER CODE BEGIN 6 */
+    /* User can add his own implementation to report the file name and line number,
     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
-
+    /* USER CODE END 6 */
 }
 
 #endif
 
 /**
   * @}
-  */ 
+  */
 
 /**
   * @}
-*/ 
+*/
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

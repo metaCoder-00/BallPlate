@@ -2,11 +2,13 @@
 
 float his[MAX_HIS_LENGTH];
 
+__IO Scan_Status thisStatus = PRE_SCAN;
+
 RunLength *runList;
 EqualMark *markList;
 Equals *equal;
-Position region[9];
-Position ballPos;
+Position region[9];  //用于存储9个标记区域
+Position ballPos[3]; //用于存储球的位置，0对于当前位置，1对应上一次位置，2对于1的前一次位置
 
 /*预扫描，用于记录板上区域的坐标*/
 void Pre_Scan(void)
@@ -15,7 +17,7 @@ void Pre_Scan(void)
     Mid_Filter((uint8_t **)ov2640_GRAY_BUFFER);
     Gray_To_BW((uint8_t **)ov2640_GRAY_BUFFER);
     Run_Label((uint8_t **)ov2640_GRAY_BUFFER);
-    Label_Center((uint8_t **)ov2640_GRAY_BUFFER, region);
+    Label_Center((uint8_t **)ov2640_GRAY_BUFFER, region, PRE_SCAN);
 }
 
 /*扫描小球的坐标*/
@@ -25,18 +27,18 @@ void Ball_Scan(void)
     Mid_Filter((uint8_t **)ov2640_GRAY_BUFFER);
     Gray_To_BW((uint8_t **)ov2640_GRAY_BUFFER);
     Run_Label((uint8_t **)ov2640_GRAY_BUFFER);
-    Label_Center((uint8_t **)ov2640_GRAY_BUFFER, &ballPos);
+    Label_Center((uint8_t **)ov2640_GRAY_BUFFER, ballPos, BALL_SCAN);
 }
 
 void Img_Process(void)
 {
-    uint16_t i;
+    // uint16_t i;
 
-    YUV2Red((YUV_Format *)ov2640_FRAME_BUFFER, (__IO uint8_t **)ov2640_GRAY_BUFFER, OV2640_IMG_HEIGHT, OV2640_IMG_WIDTH);
-    Mid_Filter((uint8_t **)ov2640_GRAY_BUFFER);
-    Gray_To_BW((uint8_t **)ov2640_GRAY_BUFFER);
-    Run_Label((uint8_t **)ov2640_GRAY_BUFFER);
-    Label_Center((uint8_t **)ov2640_GRAY_BUFFER, &ballPos);
+    // YUV2Gray((YUV_Format *)ov2640_FRAME_BUFFER, (__IO uint8_t **)ov2640_GRAY_BUFFER, OV2640_IMG_HEIGHT, OV2640_IMG_WIDTH);
+    // Mid_Filter((uint8_t **)ov2640_GRAY_BUFFER);
+
+    // Pre_Scan();
+    // Ball_Scan();
 
     /* WIFI Img Send */
     // while (recv[0] != '.')
@@ -51,14 +53,66 @@ void Img_Process(void)
     //     HAL_UART_Receive(&huart1, (uint8_t *)recv, 1, 0xffffffff);
     // }
 
-    /**UART Img Send */
-    // HAL_UART_Transmit(&huart1, testCMD_Start, 2, 0xffffffff);
-    // for (i = 0; i < OV2640_IMG_HEIGHT; i++)
-    // {
-    //     HAL_UART_Transmit(&huart1, (uint8_t *)ov2640_GRAY_BUFFER[i], OV2640_IMG_WIDTH, 0xffffffff);
-    // }
+    uint16_t i;
+	__IO float test;
+    __IO float distance;
 
-    // HAL_UART_Transmit(&huart1, testCMD_End, 2, 0xffffffff);
+    if (thisStatus == PRE_SCAN)
+    {
+        for (i = 0; i < 9; ++i)
+        {
+            region[i].row = 0;
+            region[i].col = 0;
+        }
+        Pre_Scan();
+        for (i = 0; i < 9; ++i)
+        {
+            if (region[i].row == 0 || region[i].col == 0)
+            {
+                return;
+            }
+
+            // distance = ((float)region[i].row - (float)region[4].row) * ((float)region[i].row - (float)region[4].row)
+			// 		+ ((float)region[i].col - (float)region[4].col) * ((float)region[i].col - (float)region[4].col);
+            if (i != 4)
+            {
+                test = distance = ((float)region[i].row - (float)region[4].row) * ((float)region[i].row - (float)region[4].row)
+                        + ((float)region[i].col - (float)region[4].col) * ((float)region[i].col - (float)region[4].col);
+                
+                if (distance > MAX_REGION_DISTANCE || distance < MIN_REGION_DISTANCE)
+                {
+                    return;
+                }
+            }
+        }
+        thisStatus = BALL_SCAN;
+    }
+    else if (thisStatus == BALL_SCAN)
+    {
+        Ball_Scan();
+
+        if (ballPos[1].row == 0 && ballPos[1].col == 0)
+        {
+            distance = 0;
+        }
+        else
+        {
+            distance = (ballPos[0].row - ballPos[1].row) * (ballPos[0].row - ballPos[1].row)
+                        + (ballPos[0].col - ballPos[1].col) * (ballPos[0].col - ballPos[1].col);
+        }
+        if (distance < MAX_BALL_DISTANCE)
+        {
+            ballPos[2].row = ballPos[1].row;
+            ballPos[2].col = ballPos[1].col;
+            ballPos[1].row = ballPos[0].row;
+            ballPos[1].col = ballPos[0].col;
+        }
+        else
+        {
+            ballPos[0].row = ballPos[1].row;
+            ballPos[0].col = ballPos[1].col;
+        }
+    }
 }
 
 /*求图像的统计直方图，并返回图像平均灰度*/
@@ -120,17 +174,11 @@ static void Gray_To_BW(uint8_t **image)
     float avgGray;
 
     avgGray = Get_Histogram((uint8_t **)ov2640_GRAY_BUFFER, his);
-    if (avgGray < GRAY_FLOOR)
+    threshold = Osu_Threshold(his, avgGray);
+
+    if (threshold > GRAY_TH_CEILING || threshold < GRAY_TH_FLOOR)
     {
-        threshold = 255;
-    }
-    else if (avgGray > GRAY_CEILING)
-    {
-        threshold = 0;
-    }
-    else
-    {
-        threshold = Osu_Threshold(his, avgGray);
+        threshold = 135;
     }
 
     for (i = 0; i < IMAGE_HEIGHT; ++i)
@@ -302,11 +350,12 @@ static void Equal_Process(uint16_t *equal, uint16_t nValue1, uint16_t nValue2)
 }
 
 /*标记出连通区域的中心*/
-void Label_Center(uint8_t **image, Position *pos)
+static void Label_Center(uint8_t **image, Position *pos, Scan_Status thisStatus)
 {
     uint16_t i, j, k, cnt = 0;
     float sumRow, sumCol, area;
-    uint8_t level = 255 / (runList->data[runList->last].nLabel);
+    uint16_t thisRow, thisCol;
+    // uint8_t level = 255 / (runList->data[runList->last].nLabel);
 
     for (k = 1; k <= runList->data[runList->last].nLabel; ++k)
     {
@@ -322,23 +371,43 @@ void Label_Center(uint8_t **image, Position *pos)
                     sumRow += i;
                     sumCol += j;
                     ++area;
-                    image[i][j] = k * level;
+                    // image[i][j] = k * level;
                 }
             }
         }
 
         if (area > AREA_TH)
         {
-            image[(uint16_t)(sumRow / area)][(uint16_t)(sumCol / area)] = WHITE;
-            (pos + cnt)->row = (uint16_t)(sumRow / area);
-            (pos + cnt)->col = (uint16_t)(sumCol / area);
-            ++cnt;
+            if (thisStatus == PRE_SCAN)
+            {
+                if (cnt < 9)
+                {
+                    thisRow = (uint16_t)(sumRow / area);
+                    thisCol = (uint16_t)(sumCol / area);
+                    // image[thisRow][thisCol] = WHITE;
+                    (pos + cnt)->row = thisRow;
+                    (pos + cnt)->col = thisCol;
+                    ++cnt;
+                }
+            }
+            else if (thisStatus == BALL_SCAN)
+            {
+                if (cnt < 1)
+                {
+                    thisRow = (uint16_t)(sumRow / area);
+                    thisCol = (uint16_t)(sumCol / area);
+                    // image[thisRow][thisCol] = WHITE;
+                    (pos + cnt)->row = thisRow;
+                    (pos + cnt)->col = thisCol;
+                    ++cnt;
+                }
+            }
         }
     }
 }
 
 /*中值滤波器*/
-void Mid_Filter(uint8_t **image)
+static void Mid_Filter(uint8_t **image)
 {
     uint16_t i, j, k, l;
     uint8_t temp[9]; //用于存放中心元素及其8邻域元素

@@ -15,7 +15,17 @@
 //拨码开关 00110010
 
 
+#define Direction_X_to_1()      HAL_GPIO_WritePin(MOTOR_X_Direction_GPIO_Port, MOTOR_X_Direction_Pin, GPIO_PIN_SET)
+#define Direction_X_back_1()    HAL_GPIO_WritePin(MOTOR_X_Direction_GPIO_Port, MOTOR_X_Direction_Pin, GPIO_PIN_RESET)
+
+#define Direction_Y_to_2()      HAL_GPIO_WritePin(MOTOR_Y_Direction_GPIO_Port, MOTOR_Y_Direction_Pin, GPIO_PIN_SET);
+#define Direction_Y_back_2()    HAL_GPIO_WritePin(MOTOR_Y_Direction_GPIO_Port, MOTOR_Y_Direction_Pin, GPIO_PIN_RESET);
+
 void MotorInit(void);
+
+void X_MotorSlowlyTest(void);
+
+void Y_MotorSlowlyTest(void);
 
 void X_Motor_Fre_Change(int16_t X_Motor_Fre);
 
